@@ -43,7 +43,7 @@ Do not commit `.env` or files under `caddy/certs/`.
 ## Architecture
 
 ```text
-Browser → Caddy (:443 TLS) → sites/<name>.caddy host match → <traefik container>:80 on the stack network → DSS services
+Browser → Caddy (:443 TLS) → sites/<name>.caddy host match → <traefik container>.<stack network>:80 → DSS services
 ```
 
 Traefik in DSS routes by `Host(...)` on the `web` entrypoint only; it does not publish 80/443 on the Docker host. A host that no site file matches gets `404` from Caddy.
@@ -53,7 +53,7 @@ A stack is two files:
 - `caddy/stacks/<name>.yaml`: Compose override that joins `caddy` to the stack's external network.
 - `caddy/sites/<name>.caddy`: host matcher and upstream.
 
-The repo ships the default stack `dss` (network `traefik_proxy`, upstream `traefik:80`, domain `dss.localhost`).
+The repo ships the default stack `dss` (network `traefik_proxy`, upstream `traefik.traefik_proxy:80`, domain `dss.localhost`).
 
 ## Add a DSS stack
 
@@ -81,7 +81,7 @@ Example: a DSS stack started with `DSS_NAME=projb` and `DOMAIN=projb.localhost`.
    ```caddy
    @projb host projb.localhost *.projb.localhost *.*.projb.localhost
    handle @projb {
-   	reverse_proxy projb-traefik:80 {
+   	reverse_proxy projb-traefik.projb_traefik_proxy:80 {
    		header_up Host {http.request.host}
    	}
    }
@@ -90,13 +90,13 @@ Example: a DSS stack started with `DSS_NAME=projb` and `DOMAIN=projb.localhost`.
 3. Add the domain to `CADDY_DOMAINS` in `.env`: `CADDY_DOMAINS="dss.localhost projb.localhost"`.
 4. Run `make cert`, then `make up`. Run `make verify-edge` to check.
 
-**Upstream rule:** use the Traefik container name, `<DSS_NAME>-traefik` (plain `traefik` for the default stack). Do not use the service name `traefik`: it exists on every stack network, so Docker DNS on Caddy would answer with any of them. Create the DSS network first (`make setup` in DSS with `DSS_NAME=projb`); `make setup` here stops with the stack file name when a network is missing.
+**Upstream rule:** use `<traefik container>.<stack network>:80`, which is `<DSS_NAME>-traefik.<DSS_NAME>_traefik_proxy:80` (`traefik.traefik_proxy:80` for the default stack). Every DSS Traefik has the service alias `traefik` on its own network, and Caddy is on all stack networks, so Docker DNS can answer a bare `traefik` with another stack's Traefik. The network suffix limits the lookup to that one network. Create the DSS network first (`make setup` in DSS with `DSS_NAME=projb`); `make setup` here stops with the stack file name when a network is missing.
 
 ## MinIO aliases and CA trust
 
 DSS Traefik no longer carries the aliases `minio.<domain>` and `s3.minio.<domain>`. Each stack file puts them on the `caddy` service, so a container on that stack network that calls `https://s3.minio.<domain>` reaches Caddy (TLS), then Traefik, then MinIO.
 
-By default no DSS container calls these URLs: MinIO, Temporal, and Garage UI use internal HTTP (`http://minio:9000`, `http://garage:3900`). Only user apps and `oauth2-proxy` (its issuer host is pinned to the Docker host, which is Caddy on 443) call `https://*.<domain>` through Caddy.
+By default no DSS container calls these URLs: MinIO, Temporal, and Garage UI use internal HTTP (`http://minio:9000`, `http://garage:3900`). Only user apps, and `oauth2-proxy` when `OAUTH2_PROXY_OIDC_ISSUER_HOST` is set (that host maps to the Docker host, which is Caddy on 443), call `https://*.<domain>` through Caddy.
 
 A container that calls such a URL must trust the mkcert root CA, or Caddy's certificate fails verification. Mount the CA and point the client at it:
 

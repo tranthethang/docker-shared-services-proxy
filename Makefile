@@ -19,7 +19,7 @@ setup:
 	done
 
 cert:
-	@CADDY_DOMAINS="$$(sed -n 's/^CADDY_DOMAINS=//p' .env 2>/dev/null | tail -n 1 | tr -d '"')" ./scripts/gen-certs.sh caddy/certs
+	@CADDY_DOMAINS="$$(sed -n 's/^CADDY_DOMAINS=//p' .env 2>/dev/null | tail -n 1 | tr -d "\"'")" ./scripts/gen-certs.sh caddy/certs
 
 up: setup
 	@test -f caddy/certs/server.crt && test -f caddy/certs/server.key || { \
@@ -39,4 +39,4 @@ logs:
 
 # Check each CADDY_DOMAINS entry through Caddy (needs Caddy and DSS Traefik up).
 verify-edge:
-	@CADDY_DOMAINS="$$(sed -n 's/^CADDY_DOMAINS=//p' .env 2>/dev/null | tail -n 1 | tr -d '"')" ./scripts/verify-edge.sh
+	@CADDY_DOMAINS="$$(sed -n 's/^CADDY_DOMAINS=//p' .env 2>/dev/null | tail -n 1 | tr -d "\"'")" ./scripts/verify-edge.sh

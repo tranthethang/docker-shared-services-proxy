@@ -20,7 +20,7 @@ Run `make setup` in DSS before `make setup` here. Start Caddy before DSS Traefik
 
 - `caddy/compose.yaml` — Caddy service, publishes 80/443; networks come from the stack files
 - `caddy/stacks/` — one Compose override per DSS stack (`<name>.yaml`): external network and MinIO aliases; the Makefile adds every file with `-f`
-- `caddy/sites/` — one site file per stack (`<name>.caddy`): host matcher and upstream (the Traefik container name); imported by the Caddyfile
+- `caddy/sites/` — one site file per stack (`<name>.caddy`): host matcher and upstream (`<traefik container>.<stack network>:80`); imported by the Caddyfile
 - `caddy/Caddyfile` — TLS with mounted certs; `import sites/*.caddy`; 404 for an unmatched host
 - `scripts/gen-certs.sh` — mkcert SANs for each domain in `CADDY_DOMAINS`
 - `scripts/verify-edge.sh` — checks behind `make verify-edge`
