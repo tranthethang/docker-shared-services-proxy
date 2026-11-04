@@ -1,7 +1,7 @@
 STACK_FILES := $(sort $(wildcard caddy/stacks/*.yaml))
 COMPOSE := docker compose -f caddy/compose.yaml $(addprefix -f ,$(STACK_FILES)) --env-file .env
 
-.PHONY: setup cert up down ps logs
+.PHONY: setup cert up down ps logs verify-edge
 
 # Every stack file names one external network (`name:` under `networks:`).
 # Fail with the stack file and the DSS command that creates the network.
@@ -36,3 +36,7 @@ ps:
 
 logs:
 	@$(COMPOSE) logs -f
+
+# Check each CADDY_DOMAINS entry through Caddy (needs Caddy and DSS Traefik up).
+verify-edge:
+	@CADDY_DOMAINS="$$(sed -n 's/^CADDY_DOMAINS=//p' .env 2>/dev/null | tail -n 1 | tr -d '"')" ./scripts/verify-edge.sh
