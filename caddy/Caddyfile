@@ -1,0 +1,15 @@
+{
+	admin localhost:2019
+	auto_https off
+}
+
+:80 {
+	redir https://{host}{uri} permanent
+}
+
+:443 {
+	tls /etc/caddy/certs/server.crt /etc/caddy/certs/server.key
+	reverse_proxy traefik:80 {
+		header_up Host {http.request.host}
+	}
+}
