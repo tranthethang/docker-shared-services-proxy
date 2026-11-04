@@ -1,5 +1,6 @@
 name: caddy-edge
 
+# Networks come from caddy/stacks/*.yaml (one file per DSS stack).
 services:
   caddy:
     image: caddy:2.9.1-alpine
@@ -10,6 +11,7 @@ services:
       - "${CADDY_BIND:-127.0.0.1}:443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./sites:/etc/caddy/sites:ro
       - ./certs:/etc/caddy/certs:ro
     healthcheck:
       test:
@@ -25,10 +27,3 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
-    networks:
-      - traefik_proxy
-
-networks:
-  traefik_proxy:
-    name: traefik_proxy
-    external: true

@@ -1,13 +1,22 @@
-COMPOSE := docker compose -f caddy/compose.yaml --env-file .env
+STACK_FILES := $(sort $(wildcard caddy/stacks/*.yaml))
+COMPOSE := docker compose -f caddy/compose.yaml $(addprefix -f ,$(STACK_FILES)) --env-file .env
 
 .PHONY: setup cert up down ps logs
 
+# Every stack file names one external network (`name:` under `networks:`).
+# Fail with the stack file and the DSS command that creates the network.
 setup:
 	@test -f .env || cp .env.example .env
-	@docker network inspect traefik_proxy >/dev/null 2>&1 || { \
-		echo "Network traefik_proxy is missing. Run 'make setup' in docker-shared-services first."; \
-		exit 1; \
-	}
+	@for f in $(STACK_FILES); do \
+		for net in $$(awk '/^[[:space:]]+name:/ {print $$2}' "$$f"); do \
+			docker network inspect "$$net" >/dev/null 2>&1 || { \
+				prefix=$$(echo "$$net" | sed 's/_*traefik_proxy$$//'); \
+				echo "Network $$net (from $$f) is missing."; \
+				echo "Run 'make setup' in docker-shared-services$${prefix:+ with DSS_NAME=$$prefix} first."; \
+				exit 1; \
+			}; \
+		done; \
+	done
 
 cert:
 	@./scripts/gen-certs.sh caddy/certs

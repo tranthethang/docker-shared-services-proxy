@@ -1,0 +1,11 @@
+# Default DSS stack (DSS_NAME unset): Traefik network traefik_proxy.
+# One file per stack. Add stacks/<name>.yaml and sites/<name>.caddy for more.
+services:
+  caddy:
+    networks:
+      traefik_proxy: {}
+
+networks:
+  traefik_proxy:
+    name: traefik_proxy
+    external: true
