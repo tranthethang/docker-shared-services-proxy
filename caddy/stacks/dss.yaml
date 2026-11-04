@@ -3,7 +3,12 @@
 services:
   caddy:
     networks:
-      traefik_proxy: {}
+      traefik_proxy:
+        # Containers on this network that call the public MinIO URLs reach
+        # Caddy (TLS), which proxies to Traefik. DSS Traefik no longer owns them.
+        aliases:
+          - minio.dss.localhost
+          - s3.minio.dss.localhost
 
 networks:
   traefik_proxy:
