@@ -1,0 +1,8 @@
+# Default DSS stack: Traefik container "traefik" on network traefik_proxy.
+# Use a matcher name unique per stack (Caddy rejects a duplicate in one site).
+@dss host dss.localhost *.dss.localhost *.*.dss.localhost
+handle @dss {
+	reverse_proxy traefik:80 {
+		header_up Host {http.request.host}
+	}
+}

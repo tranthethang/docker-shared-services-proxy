@@ -9,7 +9,12 @@
 
 :443 {
 	tls /etc/caddy/certs/server.crt /etc/caddy/certs/server.key
-	reverse_proxy traefik:80 {
-		header_up Host {http.request.host}
+
+	# One file per stack: a named matcher plus a handle block with its upstream.
+	import sites/*.caddy
+
+	# No stack file matched this host.
+	handle {
+		respond "No DSS stack serves this host." 404
 	}
 }
