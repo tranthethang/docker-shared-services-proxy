@@ -19,7 +19,7 @@ setup:
 	done
 
 cert:
-	@./scripts/gen-certs.sh caddy/certs
+	@CADDY_DOMAINS="$$(sed -n 's/^CADDY_DOMAINS=//p' .env 2>/dev/null | tail -n 1 | tr -d '"')" ./scripts/gen-certs.sh caddy/certs
 
 up: setup
 	@test -f caddy/certs/server.crt && test -f caddy/certs/server.key || { \

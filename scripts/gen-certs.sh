@@ -4,21 +4,37 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: scripts/gen-certs.sh CERT_DIR
+Usage: scripts/gen-certs.sh CERT_DIR [DOMAIN...]
 
-Write CERT_DIR/server.crt and CERT_DIR/server.key with mkcert. The certificate
-covers the first non-loopback local IP, *.dss.localhost and its nested
-wildcards, localhost, 127.0.0.1, and ::1.
+Write CERT_DIR/server.crt and CERT_DIR/server.key with mkcert. Domains come from
+the arguments, else from CADDY_DOMAINS (space separated), else dss.localhost.
+For each domain the certificate covers DOMAIN, *.DOMAIN, *.minio.DOMAIN,
+*.garage.DOMAIN, and *.tts.DOMAIN. It also covers the first non-loopback local
+IP, localhost, 127.0.0.1, and ::1.
 EOF
 }
 
-if [[ $# -ne 1 || "$1" == "-h" || "$1" == "--help" ]]; then
+if [[ $# -lt 1 || "$1" == "-h" || "$1" == "--help" ]]; then
   usage
-  [[ $# -eq 1 ]] && exit 0
+  [[ $# -ge 1 ]] && exit 0
   exit 2
 fi
 
 cert_dir=$1
+shift
+if [[ $# -gt 0 ]]; then
+  domains=("$@")
+else
+  read -r -a domains <<<"${CADDY_DOMAINS:-dss.localhost}"
+fi
+if [[ ${#domains[@]} -eq 0 ]]; then
+  domains=(dss.localhost)
+fi
+
+sans=()
+for d in "${domains[@]}"; do
+  sans+=("$d" "*.$d" "*.minio.$d" "*.garage.$d" "*.tts.$d")
+done
 
 echo "Detecting local IP..."
 current_ip=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | awk '{print $2}' | sed 's/addr://' | head -n 1 || true)
@@ -33,11 +49,7 @@ fi
 mkcert -cert-file "$cert_dir/server.crt" \
   -key-file "$cert_dir/server.key" \
   "$current_ip" \
-  "*.dss.localhost" \
-  "*.minio.dss.localhost" \
-  "*.garage.dss.localhost" \
-  "*.tts.dss.localhost" \
-  "dss.localhost" \
+  "${sans[@]}" \
   localhost \
   127.0.0.1 \
   ::1
