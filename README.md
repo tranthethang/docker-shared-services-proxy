@@ -57,7 +57,7 @@ The default local domain is **sandbox** (`caddy/stacks/sandbox.yaml`, `caddy/sit
 
 ## Add a DSS stack
 
-Example: a DSS stack started with `DSS_NAME=projb` and `DOMAIN=projb.localhost`. Its network is `projb_traefik_proxy` and its Traefik container is `projb-traefik`.
+Example: a DSS stack started with `SANDBOX_NAME=projb` and `DOMAIN=projb.localhost`. Its network is `projb_traefik_proxy` and its Traefik container is `projb-traefik`.
 
 1. Create `caddy/stacks/projb.yaml`:
 
@@ -90,7 +90,7 @@ Example: a DSS stack started with `DSS_NAME=projb` and `DOMAIN=projb.localhost`.
 3. Add the domain to `CADDY_DOMAINS` in `.env`: `CADDY_DOMAINS="sandbox.localhost dss.localhost projb.localhost"`.
 4. Run `make cert`, then `make up`. Run `make verify-edge` to check.
 
-**Upstream rule:** use `<traefik container>.<stack network>:80`, which is `<DSS_NAME>-traefik.<DSS_NAME>_traefik_proxy:80` (`traefik.traefik_proxy:80` for the default stack). Every DSS Traefik has the service alias `traefik` on its own network, and Caddy is on all stack networks, so Docker DNS can answer a bare `traefik` with another stack's Traefik. The network suffix limits the lookup to that one network. Create the DSS network first (`make setup` in DSS with `DSS_NAME=projb`); `make setup` here stops with the stack file name when a network is missing.
+**Upstream rule:** use `<traefik container>.<stack network>:80`, which is `<SANDBOX_NAME>-traefik.<SANDBOX_NAME>_traefik_proxy:80` (`traefik.traefik_proxy:80` for the default stack). Every DSS Traefik has the service alias `traefik` on its own network, and Caddy is on all stack networks, so Docker DNS can answer a bare `traefik` with another stack's Traefik. The network suffix limits the lookup to that one network. Create the DSS network first (`make setup` in DSS with `SANDBOX_NAME=projb`); `make setup` here stops with the stack file name when a network is missing.
 
 ## MinIO aliases and CA trust
 

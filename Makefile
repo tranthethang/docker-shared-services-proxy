@@ -12,7 +12,7 @@ setup:
 			docker network inspect "$$net" >/dev/null 2>&1 || { \
 				prefix=$$(echo "$$net" | sed 's/_*traefik_proxy$$//'); \
 				echo "Network $$net (from $$f) is missing."; \
-				echo "Run 'make setup' in docker-shared-services$${prefix:+ with DSS_NAME=$$prefix} first."; \
+				echo "Run 'make setup' in docker-shared-services$${prefix:+ with SANDBOX_NAME=$$prefix} first."; \
 				exit 1; \
 			}; \
 		done; \
