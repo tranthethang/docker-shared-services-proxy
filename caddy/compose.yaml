@@ -1,0 +1,29 @@
+name: caddy-edge
+
+# Networks come from caddy/stacks/*.yaml (one file per DSS stack).
+services:
+  caddy:
+    image: caddy:2.9.1-alpine
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "${CADDY_BIND:-127.0.0.1}:80:80"
+      - "${CADDY_BIND:-127.0.0.1}:443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./sites:/etc/caddy/sites:ro
+      - ./certs:/etc/caddy/certs:ro
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://127.0.0.1:2019/config/",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

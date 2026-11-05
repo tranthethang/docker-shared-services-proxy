@@ -1,0 +1,5 @@
+.env
+.DS_Store
+caddy/certs/*.crt
+caddy/certs/*.key
+caddy/certs/*.pem
