@@ -31,4 +31,4 @@ Run `make setup` in DSS before `make setup` here. Start Caddy before DSS Traefik
 - Pin image tags in `compose.yaml`.
 - Do not commit `.env` or `caddy/certs/*.{crt,key}`.
 - Use `compose.yaml` (not legacy `docker-compose.yml`).
-- A new stack needs `stacks/<name>.yaml`, `sites/<name>.caddy` with a unique matcher name, and its domain in `CADDY_DOMAINS`. See `README.md`.
+- A new stack needs `stacks/<name>.yaml`, `sites/<name>.caddy` with a unique matcher name, and its domain in `CADDY_DOMAINS`. See [docs/add-stack.md](docs/add-stack.md).
