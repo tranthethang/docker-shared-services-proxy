@@ -17,7 +17,7 @@ Caddy is for **local use only**. Do not use it in staging or production.
 3. In **docker-shared-services**: `make up service=traefik`, then `make up service=<name>` for each service you need.
 4. In this repo: `make verify-edge`.
 
-Browse services at `https://<service>.dss.localhost` (for example `https://traefik.dss.localhost` for the Traefik dashboard).
+Browse services at `https://<service>.sandbox.localhost` (for example `https://traefik.sandbox.localhost` for the Traefik dashboard).
 
 ## Commands
 
@@ -36,7 +36,7 @@ Browse services at `https://<service>.dss.localhost` (for example `https://traef
 Copy `.env.example` to `.env`.
 
 - `CADDY_BIND`: `127.0.0.1` for local development (default) or `0.0.0.0` when the host must accept LAN or public traffic.
-- `CADDY_DOMAINS`: space-separated domains on the certificate, one per DSS stack. Default `dss.localhost`. Each domain gets the SANs `<d>`, `*.<d>`, `*.minio.<d>`, `*.garage.<d>`, and `*.tts.<d>`. Run `make cert` and restart Caddy after a change.
+- `CADDY_DOMAINS`: space-separated domains on the certificate, one site file per domain. Default in `.env.example` is `sandbox.localhost dss.localhost`. Each domain gets the SANs `<d>`, `*.<d>`, `*.minio.<d>`, `*.garage.<d>`, and `*.tts.<d>`. Run `make cert` and restart Caddy after a change.
 
 Do not commit `.env` or files under `caddy/certs/`.
 
@@ -53,7 +53,7 @@ A stack is two files:
 - `caddy/stacks/<name>.yaml`: Compose override that joins `caddy` to the stack's external network.
 - `caddy/sites/<name>.caddy`: host matcher and upstream.
 
-The repo ships the default stack `dss` (network `traefik_proxy`, upstream `traefik.traefik_proxy:80`, domain `dss.localhost`).
+The default local domain is **sandbox** (`caddy/stacks/sandbox.yaml`, `caddy/sites/sandbox.caddy`, network `traefik_proxy`, upstream `traefik.traefik_proxy:80`, domain `sandbox.localhost`). The **dss** stack and site files remain for `dss.localhost` and its MinIO aliases.
 
 ## Add a DSS stack
 
@@ -87,7 +87,7 @@ Example: a DSS stack started with `DSS_NAME=projb` and `DOMAIN=projb.localhost`.
    }
    ```
 
-3. Add the domain to `CADDY_DOMAINS` in `.env`: `CADDY_DOMAINS="dss.localhost projb.localhost"`.
+3. Add the domain to `CADDY_DOMAINS` in `.env`: `CADDY_DOMAINS="sandbox.localhost dss.localhost projb.localhost"`.
 4. Run `make cert`, then `make up`. Run `make verify-edge` to check.
 
 **Upstream rule:** use `<traefik container>.<stack network>:80`, which is `<DSS_NAME>-traefik.<DSS_NAME>_traefik_proxy:80` (`traefik.traefik_proxy:80` for the default stack). Every DSS Traefik has the service alias `traefik` on its own network, and Caddy is on all stack networks, so Docker DNS can answer a bare `traefik` with another stack's Traefik. The network suffix limits the lookup to that one network. Create the DSS network first (`make setup` in DSS with `DSS_NAME=projb`); `make setup` here stops with the stack file name when a network is missing.

@@ -1,5 +1,4 @@
-# Default DSS stack (DSS_NAME unset): Traefik network traefik_proxy.
-# One file per stack. Add stacks/<name>.yaml and sites/<name>.caddy for more.
+# Legacy dss.localhost MinIO URLs (see stacks/sandbox.yaml for the default domain).
 services:
   caddy:
     networks:

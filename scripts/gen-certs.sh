@@ -7,7 +7,7 @@ usage() {
 Usage: scripts/gen-certs.sh CERT_DIR [DOMAIN...]
 
 Write CERT_DIR/server.crt and CERT_DIR/server.key with mkcert. Domains come from
-the arguments, else from CADDY_DOMAINS (space separated), else dss.localhost.
+the arguments, else from CADDY_DOMAINS (space separated), else sandbox.localhost.
 For each domain the certificate covers DOMAIN, *.DOMAIN, *.minio.DOMAIN,
 *.garage.DOMAIN, and *.tts.DOMAIN. It also covers the first non-loopback local
 IP, localhost, 127.0.0.1, and ::1.
@@ -25,10 +25,10 @@ shift
 if [[ $# -gt 0 ]]; then
   domains=("$@")
 else
-  read -r -a domains <<<"${CADDY_DOMAINS:-dss.localhost}"
+  read -r -a domains <<<"${CADDY_DOMAINS:-sandbox.localhost}"
 fi
 if [[ ${#domains[@]} -eq 0 ]]; then
-  domains=(dss.localhost)
+  domains=(sandbox.localhost)
 fi
 
 sans=()

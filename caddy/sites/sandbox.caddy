@@ -1,0 +1,8 @@
+# Default DSS stack when DOMAIN=sandbox.localhost (DSS_NAME unset).
+# Matcher name must differ from other site files.
+@sandbox host sandbox.localhost *.sandbox.localhost *.*.sandbox.localhost
+handle @sandbox {
+	reverse_proxy traefik.traefik_proxy:80 {
+		header_up Host {http.request.host}
+	}
+}

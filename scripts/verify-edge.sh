@@ -6,7 +6,7 @@ usage() {
   cat <<'EOF'
 Usage: scripts/verify-edge.sh [DOMAIN...]
 
-For each domain (arguments, else CADDY_DOMAINS, else dss.localhost), call
+For each domain (arguments, else CADDY_DOMAINS, else sandbox.localhost), call
 127.0.0.1 with the host traefik.DOMAIN and check:
   1. http://traefik.DOMAIN/ redirects permanently to https://
   2. https://traefik.DOMAIN/dashboard/ returns 401 (Traefik answered)
@@ -24,10 +24,10 @@ fi
 if [[ $# -gt 0 ]]; then
   domains=("$@")
 else
-  read -r -a domains <<<"${CADDY_DOMAINS:-dss.localhost}"
+  read -r -a domains <<<"${CADDY_DOMAINS:-sandbox.localhost}"
 fi
 if [[ ${#domains[@]} -eq 0 ]]; then
-  domains=(dss.localhost)
+  domains=(sandbox.localhost)
 fi
 
 tls_args=()

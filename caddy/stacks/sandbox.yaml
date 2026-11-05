@@ -1,0 +1,13 @@
+# Default local domain (DOMAIN=sandbox.localhost in DSS). Same Traefik network as stacks/dss.yaml.
+services:
+  caddy:
+    networks:
+      traefik_proxy:
+        aliases:
+          - minio.sandbox.localhost
+          - s3.minio.sandbox.localhost
+
+networks:
+  traefik_proxy:
+    name: traefik_proxy
+    external: true
