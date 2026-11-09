@@ -6,6 +6,8 @@ services:
         aliases:
           - minio.sandbox.localhost
           - s3.minio.sandbox.localhost
+          # The IdP container fetches its own JWKS over HTTPS (id_token_hint at /oauth2/end-session).
+          - idp.sandbox.localhost
 
 networks:
   traefik_proxy:
